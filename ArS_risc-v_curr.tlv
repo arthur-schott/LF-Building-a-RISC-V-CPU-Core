@@ -67,10 +67,18 @@
    // Define instruction fields
    
    $opcode[6:0] = $instr[6:0];
+   
    $rd[4:0] = $instr[11:7];
+   $rd_valid = ! ($is_s_instr || $is_b_instr);
+   
    $funct3[2:0] = $instr[14:12];
    $rs1[4:0] = $instr[19:15];
+   $rs1_valid = ! ($is_j_instr || $is_u_instr);
+   
    $rs2[4:0] = $instr[24:20];
+   $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+   
+   $imm_valid = ! $is_r_instr;
    
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
@@ -79,5 +87,8 @@
    //m4+rf(32, 32, $reset, $wr_en, $wr_index[4:0], $wr_data[31:0], $rd1_en, $rd1_index[4:0], $rd1_data, $rd2_en, $rd2_index[4:0], $rd2_data)
    //m4+dmem(32, 32, $reset, $addr[4:0], $wr_en, $wr_data[31:0], $rd_en, $rd_data)
    m4+cpu_viz()
+   
+   // Supress UNUSE-SIG warnings in LOG
+   `BOGUS_USE($rd $rd_valid $rs1 $rs1_valid $funct3 $rs2 $rs2_valid $imm_valid $is_i_instr $opcode)
 \SV
    endmodule

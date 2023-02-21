@@ -98,15 +98,21 @@
    $is_addi = $dec_bits ==? 11'bx_000_0010011;
    $is_add = $dec_bits == 11'b0_000_0110011;
    
+   // ALU
+   $result[31:0] =
+      $is_addi ? $src1_value + $imm :
+      $is_add ? $src1_value + $src2_value :
+      32'b0;
+   
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
    *failed = *cyc_cnt > M4_MAX_CYC;
    
-   m4+rf(32, 32, $reset, $wr_en, $rd, $wr_data[31:0], $rd1_en, $rs1, $rd1_data, $rd2_en, $rs2, $rd2_data)
+   m4+rf(32, 32, $reset, $wr_en, $rd, $wr_data[31:0], $rd1_en, $rs1, $src1_value, $rd2_en, $rs2, $src2_value)
    //m4+dmem(32, 32, $reset, $addr[4:0], $wr_en, $wr_data[31:0], $rd_en, $rd_data)
    m4+cpu_viz()
    
    // Supress UNUSE-SIG warnings in LOG
-   `BOGUS_USE($rd $rd_valid $rs1 $rs1_valid $funct3 $rs2 $rs2_valid $imm_valid $is_i_instr $opcode $imm)
+   //`BOGUS_USE($rd $rd_valid $rs1 $rs1_valid $funct3 $rs2 $rs2_valid $imm_valid $is_i_instr $opcode $imm)
 \SV
    endmodule

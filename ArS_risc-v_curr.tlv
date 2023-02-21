@@ -78,6 +78,12 @@
    $rs2[4:0] = $instr[24:20];
    $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
    
+   $imm[31:0] = $is_i_instr ? { {21{$instr[31]}}, $instr[30:20] } :
+                $is_s_instr ? { {21{$instr[31]}}, $instr[30:25], $instr[11:7] } :
+                $is_b_instr ? { {20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0 } :
+                $is_u_instr ? { $instr[31], $instr[30:12], 12'b0 } :
+                $is_j_instr ? { {12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0 } :
+                32'b0;  // Default
    $imm_valid = ! $is_r_instr;
    
    // Assert these to end simulation (before Makerchip cycle limit).
@@ -89,6 +95,6 @@
    m4+cpu_viz()
    
    // Supress UNUSE-SIG warnings in LOG
-   `BOGUS_USE($rd $rd_valid $rs1 $rs1_valid $funct3 $rs2 $rs2_valid $imm_valid $is_i_instr $opcode)
+   `BOGUS_USE($rd $rd_valid $rs1 $rs1_valid $funct3 $rs2 $rs2_valid $imm_valid $is_i_instr $opcode $imm)
 \SV
    endmodule

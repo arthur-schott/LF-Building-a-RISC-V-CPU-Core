@@ -47,7 +47,10 @@
    
    // Program counter
    $pc[31:0] = >>1$next_pc;
-   $next_pc[31:0] = $reset ? 32'b0 : ($pc + 32'b100);
+   $next_pc[31:0] = 
+      $reset ? 32'b0 :
+      $taken_br ? $br_tgt_pc :
+      ($pc + 32'b100);
    
    // Initial instructions memory using macro
    `READONLY_MEM($pc, $$instr[31:0]);
@@ -105,7 +108,17 @@
       $is_add ? $src1_value + $src2_value :
       32'b0;
    
-   // 
+   // Brunch logic
+   $taken_br = 
+      $is_beq ? $src1_value == $src2_value : // Branch if equal
+      $is_bne ? $src1_value == $src2_value : // Branch if not equal
+      $is_blt ? ($src1_value < $src2_value) ^ ($src1_value[31] != $src2_value[31]) : // Branch if less than
+      $is_bge ? ($src1_value >= $src2_value) ^ ($src1_value[31] != $src2_value[31]) : // Branch if less than
+      $is_bltu ? $src1_value < $src2_value : // Branch if less than, unsigned
+      $is_bgeu ? $src1_value >= $src2_value : // Branch if greater than or equal, unsigned
+      1'b0;
+   
+   $br_tgt_pc[31:0] = $pc + $imm;
    
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;

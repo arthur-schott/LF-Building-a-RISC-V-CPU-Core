@@ -23,6 +23,7 @@
    m4_asm(ADDI, x14, x0, 0)             // Initialize sum register a4 with 0
    m4_asm(ADDI, x12, x0, 1010)          // Store count of 10 in register a2.
    m4_asm(ADDI, x13, x0, 1)             // Initialize loop count register a3 with 0
+   m4_asm(ADDI, x0, x12, 1100)
    // Loop:
    m4_asm(ADD, x14, x13, x14)           // Incremental summation
    m4_asm(ADDI, x13, x13, 1)            // Increment loop count by 1
@@ -69,11 +70,11 @@
    $opcode[6:0] = $instr[6:0];
    
    $rd[4:0] = $instr[11:7];
-   $rd_valid = ! ($is_s_instr || $is_b_instr);
+   $rd_valid = !($is_s_instr || $is_b_instr) && ($rd !== 0);
    
    $funct3[2:0] = $instr[14:12];
    $rs1[4:0] = $instr[19:15];
-   $rs1_valid = ! ($is_j_instr || $is_u_instr);
+   $rs1_valid = !($is_j_instr || $is_u_instr);
    
    $rs2[4:0] = $instr[24:20];
    $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;

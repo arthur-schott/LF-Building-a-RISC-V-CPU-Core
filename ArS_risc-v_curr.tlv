@@ -124,7 +124,7 @@
    $is_and = $dec_bits == 11'b0_111_0110011;
    
    //    treating all load and store instructions
-   $is_load = $is_s_instr || $opcode == 7'b0000011;
+   $is_load = $opcode == 7'b0000011;
    
    // ALU
    //    SLTU and SLTI (set if less than, unsigned) result:
@@ -164,6 +164,7 @@
                     $sltiu_rslt : {31'b0, $src1_value[31]} ) :
       $is_sra ? $sra_rslt[31:0] :
       $is_srai ? $srai_rslt[31:0] :
+      ($is_load | $is_s_instr) ?  ( {27'b0,$rs1} + $imm):
       32'b0;
    
    
@@ -182,12 +183,15 @@
    // Jump logic
    $jalr_tgt_pc[31:0] = $src1_value + $imm;
    
+   // Write data mux for RF
+   $wr_data[31:0] = $is_load ? $ld_data : $result;
+   
    // Assert these to end simulation (before Makerchip cycle limit).
    m4+tb()
    *failed = *cyc_cnt > M4_MAX_CYC;
    
-   m4+rf(32, 32, $reset, $rd_valid, $rd, $result, $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
-   //m4+dmem(32, 32, $reset, $addr[4:0], $wr_en, $wr_data[31:0], $rd_en, $rd_data)
+   m4+rf(32, 32, $reset, $rd_valid, $rd, $wr_data, $rs1_valid, $rs1, $src1_value, $rs2_valid, $rs2, $src2_value)
+   m4+dmem(32, 32, $reset, $result[4:0], $is_s_instr, $src2_value, $is_load, $ld_data)
    m4+cpu_viz()
    
 \SV
